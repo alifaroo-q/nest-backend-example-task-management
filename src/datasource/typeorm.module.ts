@@ -1,22 +1,23 @@
 import { DataSource } from 'typeorm';
 import { Global, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Global()
 @Module({
-  imports: [],
+  imports: [ConfigModule],
   providers: [
     {
       provide: DataSource,
-      inject: [],
-      useFactory: async () => {
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
         try {
           const dataSource = new DataSource({
             type: 'postgres',
-            host: 'localhost',
-            port: 5432,
-            username: 'postgres',
-            password: 'postgres',
-            database: 'task-management',
+            database: configService.get('DB_DATABASE'),
+            port: configService.get<number>('DB_PORT'),
+            username: configService.get('DB_USERNAME'),
+            password: configService.get('DB_PASSWORD'),
+            host: configService.get('DB_HOST'),
             synchronize: true,
             entities: [`${__dirname}/../**/**.entity{.ts,.js}`],
           });

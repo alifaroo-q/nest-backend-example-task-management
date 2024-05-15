@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Patch,
   Post,
@@ -21,6 +22,8 @@ import { User } from '../auth/user.entity';
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
+  private logger = new Logger('TasksController');
+
   constructor(private taskService: TasksService) {}
 
   @Get()
@@ -28,6 +31,7 @@ export class TasksController {
     @Query() filterDto: GetTaskFilterDto,
     @GetUser() user: User,
   ): Promise<Task[]> {
+    this.logger.verbose(`User '${user.username}' retrieving all tasks`);
     return this.taskService.getTasks(filterDto, user);
   }
 
@@ -41,11 +45,13 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @GetUser() user: User,
   ): Promise<Task> {
+    this.logger.verbose(`User '${user.username}' created new task`);
     return this.taskService.createTask(createTaskDto, user);
   }
 
   @Delete('/:id')
   deleteTask(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    this.logger.verbose(`User '${user.username}' deleted a task`);
     return this.taskService.deleteTask(id, user);
   }
 
@@ -55,6 +61,7 @@ export class TasksController {
     @Body() updateTaskStatusDto: UpdateTaskStatusDto,
     @GetUser() user: User,
   ): Promise<Task> {
+    this.logger.verbose(`User '${user.username}' updated a task`);
     return this.taskService.updateTaskStatus(
       id,
       updateTaskStatusDto.status,
